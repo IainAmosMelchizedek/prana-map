@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PranaMap | Energy Healing Intake System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         * {
             margin: 0;
@@ -85,6 +86,15 @@
             font-size: 0.8rem;
             color: #7f8c8d;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            color: #7f8c8d;
         }
 
         .panel {
@@ -285,6 +295,7 @@
     <main>
         <div class="viewer-container">
             <div id="canvas-container"></div>
+            <div class="loading-indicator" id="loading-indicator">Loading model...</div>
             <div class="viewer-instructions">
                 Click and drag to rotate. Scroll to zoom. Click a chakra point to select.
             </div>
@@ -325,14 +336,14 @@
     </footer>
 
     <script>
-        // Chakra data with colors, positions, descriptions, and acupuncture correlations
+        // Chakra data with colors, positions (adjusted for MakeHuman model scale in decimeters)
         const chakraData = [
             {
                 id: 'crown',
                 name: 'Crown',
                 sanskrit: 'Sahasrara',
                 color: 0x9b59b6,
-                position: { x: 0, y: 2.4, z: 0 },
+                position: { x: 0, y: 18.5, z: 0 },
                 description: 'Connection to universal consciousness, spiritual awareness, and higher states of being.',
                 acupoint: 'Correlates to GV20 (Bai Hui) — Point of energy union measured at top of head'
             },
@@ -341,7 +352,7 @@
                 name: 'Third Eye',
                 sanskrit: 'Ajna',
                 color: 0x3498db,
-                position: { x: 0, y: 2.0, z: 0.15 },
+                position: { x: 0, y: 17.2, z: 1.2 },
                 description: 'Intuition, insight, mental clarity, and inner wisdom.',
                 acupoint: 'Located between the eyebrows, associated with pineal gland function'
             },
@@ -350,7 +361,7 @@
                 name: 'Throat',
                 sanskrit: 'Vishuddha',
                 color: 0x1abc9c,
-                position: { x: 0, y: 1.55, z: 0.1 },
+                position: { x: 0, y: 15.5, z: 0.8 },
                 description: 'Communication, self-expression, truth, and authenticity.',
                 acupoint: 'Thyroid region, connected to expression and metabolism'
             },
@@ -359,7 +370,7 @@
                 name: 'Heart',
                 sanskrit: 'Anahata',
                 color: 0x2ecc71,
-                position: { x: 0, y: 1.1, z: 0.12 },
+                position: { x: 0, y: 13.8, z: 1.0 },
                 description: 'Love, compassion, emotional balance, and connection to others.',
                 acupoint: 'Correlates to HT7 — Heart meridian measurement point'
             },
@@ -368,7 +379,7 @@
                 name: 'Solar Plexus',
                 sanskrit: 'Manipura',
                 color: 0xf1c40f,
-                position: { x: 0, y: 0.65, z: 0.12 },
+                position: { x: 0, y: 12.0, z: 1.2 },
                 description: 'Personal power, confidence, willpower, and self-esteem.',
                 acupoint: 'Correlates to CT12 — Solar plexus measurement point'
             },
@@ -377,7 +388,7 @@
                 name: 'Sacral',
                 sanskrit: 'Svadhisthana',
                 color: 0xe67e22,
-                position: { x: 0, y: 0.25, z: 0.1 },
+                position: { x: 0, y: 10.2, z: 1.0 },
                 description: 'Creativity, emotions, sensuality, and adaptability.',
                 acupoint: 'Lower abdominal region, connected to reproductive and digestive systems'
             },
@@ -386,7 +397,7 @@
                 name: 'Root',
                 sanskrit: 'Muladhara',
                 color: 0xe74c3c,
-                position: { x: 0, y: -0.15, z: 0.08 },
+                position: { x: 0, y: 8.5, z: 0.5 },
                 description: 'Grounding, security, survival instincts, and physical vitality.',
                 acupoint: 'Base of spine, correlates to BL24 — Bladder meridian points (lumbar region)'
             }
@@ -395,7 +406,7 @@
         // Application state
         let selectedChakra = null;
         let markedChakras = {};
-        let scene, camera, renderer, humanGroup;
+        let scene, camera, renderer, humanGroup, humanModel;
         let chakraMeshes = {};
         let isDragging = false;
         let prevMouseX = 0, prevMouseY = 0;
@@ -410,7 +421,7 @@
             scene.background = new THREE.Color(0xffffff);
 
             camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.set(0, 1, 5);
+            camera.position.set(0, 13, 45);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(width, height);
@@ -418,23 +429,27 @@
             container.appendChild(renderer.domElement);
 
             // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 10, 7);
+            directionalLight.position.set(10, 20, 15);
             scene.add(directionalLight);
 
-            const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
-            backLight.position.set(-5, 5, -5);
+            const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            backLight.position.set(-10, 10, -10);
             scene.add(backLight);
 
-            // Create human figure group
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(0, 5, 20);
+            scene.add(fillLight);
+
+            // Create group for human and chakras
             humanGroup = new THREE.Group();
             scene.add(humanGroup);
 
-            createHumanFigure();
-            createChakraPoints();
+            // Load the GLB model
+            loadHumanModel();
 
             // Event listeners
             renderer.domElement.addEventListener('mousedown', onMouseDown);
@@ -447,79 +462,59 @@
             animate();
         }
 
-        function createHumanFigure() {
-            const bodyMaterial = new THREE.MeshPhongMaterial({
-                color: 0xd0d5db,
-                transparent: true,
-                opacity: 0.4,
-                side: THREE.DoubleSide
-            });
+        function loadHumanModel() {
+            const loader = new THREE.GLTFLoader();
+            
+            loader.load(
+                'assets/models/pranamap-figure.glb',
+                function (gltf) {
+                    humanModel = gltf.scene;
+                    
+                    // Make the model translucent
+                    humanModel.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.material = new THREE.MeshPhongMaterial({
+                                color: 0xc9b8a8,
+                                transparent: true,
+                                opacity: 0.6,
+                                side: THREE.DoubleSide,
+                                depthWrite: false
+                            });
+                        }
+                    });
 
-            // Head
-            const headGeometry = new THREE.SphereGeometry(0.28, 32, 32);
-            const head = new THREE.Mesh(headGeometry, bodyMaterial);
-            head.position.y = 2.1;
-            humanGroup.add(head);
-
-            // Neck
-            const neckGeometry = new THREE.CylinderGeometry(0.08, 0.1, 0.25, 16);
-            const neck = new THREE.Mesh(neckGeometry, bodyMaterial);
-            neck.position.y = 1.72;
-            humanGroup.add(neck);
-
-            // Torso
-            const torsoGeometry = new THREE.CylinderGeometry(0.25, 0.2, 1.2, 16);
-            const torso = new THREE.Mesh(torsoGeometry, bodyMaterial);
-            torso.position.y = 1.0;
-            humanGroup.add(torso);
-
-            // Hips
-            const hipsGeometry = new THREE.CylinderGeometry(0.2, 0.22, 0.4, 16);
-            const hips = new THREE.Mesh(hipsGeometry, bodyMaterial);
-            hips.position.y = 0.2;
-            humanGroup.add(hips);
-
-            // Left leg
-            const legGeometry = new THREE.CylinderGeometry(0.08, 0.06, 1.2, 12);
-            const leftLeg = new THREE.Mesh(legGeometry, bodyMaterial);
-            leftLeg.position.set(-0.12, -0.6, 0);
-            humanGroup.add(leftLeg);
-
-            // Right leg
-            const rightLeg = new THREE.Mesh(legGeometry, bodyMaterial);
-            rightLeg.position.set(0.12, -0.6, 0);
-            humanGroup.add(rightLeg);
-
-            // Left arm
-            const armGeometry = new THREE.CylinderGeometry(0.05, 0.04, 0.9, 12);
-            const leftArm = new THREE.Mesh(armGeometry, bodyMaterial);
-            leftArm.position.set(-0.38, 1.05, 0);
-            leftArm.rotation.z = 0.15;
-            humanGroup.add(leftArm);
-
-            // Right arm
-            const rightArm = new THREE.Mesh(armGeometry, bodyMaterial);
-            rightArm.position.set(0.38, 1.05, 0);
-            rightArm.rotation.z = -0.15;
-            humanGroup.add(rightArm);
-
-            // Center the figure
-            humanGroup.position.y = -0.5;
+                    humanGroup.add(humanModel);
+                    
+                    // Create chakra points after model is loaded
+                    createChakraPoints();
+                    
+                    // Hide loading indicator
+                    document.getElementById('loading-indicator').style.display = 'none';
+                },
+                function (xhr) {
+                    const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+                    document.getElementById('loading-indicator').textContent = 'Loading model... ' + percent + '%';
+                },
+                function (error) {
+                    console.error('Error loading model:', error);
+                    document.getElementById('loading-indicator').textContent = 'Error loading model. Please refresh.';
+                }
+            );
         }
 
         function createChakraPoints() {
             chakraData.forEach(chakra => {
                 // Outer glow sphere
-                const glowGeometry = new THREE.SphereGeometry(0.12, 32, 32);
+                const glowGeometry = new THREE.SphereGeometry(0.9, 32, 32);
                 const glowMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
-                    opacity: 0.25
+                    opacity: 0.3
                 });
                 const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
 
                 // Inner core sphere
-                const coreGeometry = new THREE.SphereGeometry(0.06, 32, 32);
+                const coreGeometry = new THREE.SphereGeometry(0.45, 32, 32);
                 const coreMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
@@ -555,8 +550,8 @@
             const time = Date.now() * 0.002;
             Object.keys(chakraMeshes).forEach((id, index) => {
                 const mesh = chakraMeshes[id];
-                const pulse = 1 + Math.sin(time + index * 0.5) * 0.1;
-                const baseScale = markedChakras[id] ? 1.3 : 1;
+                const pulse = 1 + Math.sin(time + index * 0.5) * 0.15;
+                const baseScale = markedChakras[id] ? 1.4 : 1;
                 mesh.glow.scale.setScalar(pulse * baseScale);
             });
 
@@ -589,8 +584,8 @@
 
         function onMouseWheel(e) {
             e.preventDefault();
-            camera.position.z += e.deltaY * 0.01;
-            camera.position.z = Math.max(3, Math.min(10, camera.position.z));
+            camera.position.z += e.deltaY * 0.05;
+            camera.position.z = Math.max(25, Math.min(80, camera.position.z));
         }
 
         function onCanvasClick(e) {
@@ -691,10 +686,10 @@
                 const mesh = chakraMeshes[id];
                 if (id === chakraId) {
                     mesh.core.material.opacity = 1;
-                    mesh.glow.material.opacity = 0.4;
+                    mesh.glow.material.opacity = 0.5;
                 } else {
                     mesh.core.material.opacity = 0.9;
-                    mesh.glow.material.opacity = 0.25;
+                    mesh.glow.material.opacity = 0.3;
                 }
             });
         }
@@ -718,8 +713,8 @@
 
             // Update 3D visualization
             const mesh = chakraMeshes[selectedChakra.id];
-            mesh.glow.material.opacity = 0.5;
-            mesh.core.scale.setScalar(1.2);
+            mesh.glow.material.opacity = 0.6;
+            mesh.core.scale.setScalar(1.3);
 
             document.getElementById('mark-btn').textContent = 'Update Concern';
 
@@ -755,7 +750,7 @@
             });
 
             Object.values(chakraMeshes).forEach(mesh => {
-                mesh.glow.material.opacity = 0.25;
+                mesh.glow.material.opacity = 0.3;
                 mesh.core.scale.setScalar(1);
             });
 
