@@ -360,7 +360,7 @@
                 id: 'throat',
                 name: 'Throat',
                 sanskrit: 'Vishuddha',
-                color: 0x1abc9c,
+                color: 0x00bcd4,
                 position: { x: 0, y: 15.5, z: 0.8 },
                 description: 'Communication, self-expression, truth, and authenticity.',
                 acupoint: 'Thyroid region, connected to expression and metabolism'
@@ -369,7 +369,7 @@
                 id: 'heart',
                 name: 'Heart',
                 sanskrit: 'Anahata',
-                color: 0x2ecc71,
+                color: 0x4caf50,
                 position: { x: 0, y: 13.8, z: 1.0 },
                 description: 'Love, compassion, emotional balance, and connection to others.',
                 acupoint: 'Correlates to HT7 — Heart meridian measurement point'
@@ -505,7 +505,7 @@
         function createChakraPoints() {
             chakraData.forEach(chakra => {
                 // Outer glow sphere
-                const glowGeometry = new THREE.SphereGeometry(0.9, 32, 32);
+                const glowGeometry = new THREE.SphereGeometry(0.5, 32, 32);
                 const glowMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
@@ -514,7 +514,7 @@
                 const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
 
                 // Inner core sphere
-                const coreGeometry = new THREE.SphereGeometry(0.45, 32, 32);
+                const coreGeometry = new THREE.SphereGeometry(0.25, 32, 32);
                 const coreMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
