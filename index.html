@@ -76,6 +76,22 @@
             overflow: hidden;
         }
 
+        .lotus-backdrop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .lotus-backdrop svg {
+            width: 100%;
+            height: 100%;
+        }
+
         .viewer-instructions {
             position: absolute;
             bottom: 1rem;
@@ -86,6 +102,7 @@
             font-size: 0.8rem;
             color: #7f8c8d;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
         .loading-indicator {
@@ -95,6 +112,7 @@
             transform: translate(-50%, -50%);
             font-size: 0.9rem;
             color: #7f8c8d;
+            z-index: 10;
         }
 
         .panel {
@@ -270,6 +288,8 @@
         #canvas-container {
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         footer {
@@ -294,31 +314,23 @@
 
     <main>
         <div class="viewer-container">
-            <div id="canvas-container"></div>
             <div class="lotus-backdrop">
                 <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Center petal -->
-                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.12"/>
-                    <!-- Inner petals -->
-                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.10" transform="rotate(-15, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.10" transform="rotate(15, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.08" transform="rotate(-30, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.08" transform="rotate(30, 200, 150)"/>
-                    <!-- Middle petals -->
-                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.07" transform="rotate(-45, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.07" transform="rotate(45, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.06" transform="rotate(-60, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.06" transform="rotate(60, 200, 150)"/>
-                    <!-- Outer petals -->
-                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.05" transform="rotate(-75, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.05" transform="rotate(75, 200, 150)"/>
-                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.04" transform="rotate(-90, 200, 150)"/>
-                    <!-- Base petals (horizontal) -->
-                    <ellipse cx="200" cy="180" rx="50" ry="20" fill="#d4af37" opacity="0.08"/>
-                    <ellipse cx="160" cy="175" rx="40" ry="15" fill="#d4af37" opacity="0.06" transform="rotate(-10, 160, 175)"/>
-                    <ellipse cx="240" cy="175" rx="40" ry="15" fill="#d4af37" opacity="0.06" transform="rotate(10, 240, 175)"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#c9a227" opacity="0.15"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#c9a227" opacity="0.12" transform="rotate(-20, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#c9a227" opacity="0.12" transform="rotate(20, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="28" ry="75" fill="#c9a227" opacity="0.10" transform="rotate(-40, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="28" ry="75" fill="#c9a227" opacity="0.10" transform="rotate(40, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="32" ry="82" fill="#c9a227" opacity="0.08" transform="rotate(-60, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="32" ry="82" fill="#c9a227" opacity="0.08" transform="rotate(60, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="36" ry="90" fill="#c9a227" opacity="0.06" transform="rotate(-80, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="36" ry="90" fill="#c9a227" opacity="0.06" transform="rotate(80, 200, 150)"/>
+                    <ellipse cx="200" cy="185" rx="55" ry="18" fill="#c9a227" opacity="0.10"/>
+                    <ellipse cx="150" cy="178" rx="35" ry="12" fill="#c9a227" opacity="0.07" transform="rotate(-15, 150, 178)"/>
+                    <ellipse cx="250" cy="178" rx="35" ry="12" fill="#c9a227" opacity="0.07" transform="rotate(15, 250, 178)"/>
                 </svg>
             </div>
+            <div id="canvas-container"></div>
             <div class="loading-indicator" id="loading-indicator">Loading model...</div>
             <div class="viewer-instructions">
                 Click and drag to rotate. Scroll to zoom. Click a chakra point to select.
@@ -360,7 +372,6 @@
     </footer>
 
     <script>
-        // Chakra data with traditional colors
         const chakraData = [
             {
                 id: 'crown',
@@ -427,7 +438,6 @@
             }
         ];
 
-        // Application state
         let selectedChakra = null;
         let markedChakras = {};
         let scene, camera, renderer, humanGroup, humanModel;
@@ -435,24 +445,23 @@
         let isDragging = false;
         let prevMouseX = 0, prevMouseY = 0;
 
-        // Initialize Three.js scene
         function initScene() {
             const container = document.getElementById('canvas-container');
             const width = container.clientWidth;
             const height = container.clientHeight;
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xffffff);
+            scene.background = null;
 
             camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             camera.position.set(0, 13, 45);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setClearColor(0x000000, 0);
             renderer.setSize(width, height);
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
@@ -468,14 +477,11 @@
             fillLight.position.set(0, 5, 20);
             scene.add(fillLight);
 
-            // Create group for human and chakras
             humanGroup = new THREE.Group();
             scene.add(humanGroup);
 
-            // Load the GLB model
             loadHumanModel();
 
-            // Event listeners
             renderer.domElement.addEventListener('mousedown', onMouseDown);
             renderer.domElement.addEventListener('mousemove', onMouseMove);
             renderer.domElement.addEventListener('mouseup', onMouseUp);
@@ -494,7 +500,6 @@
                 function (gltf) {
                     humanModel = gltf.scene;
                     
-                    // Make the model translucent
                     humanModel.traverse(function (child) {
                         if (child.isMesh) {
                             child.material = new THREE.MeshPhongMaterial({
@@ -508,11 +513,7 @@
                     });
 
                     humanGroup.add(humanModel);
-                    
-                    // Create chakra points after model is loaded
                     createChakraPoints();
-                    
-                    // Hide loading indicator
                     document.getElementById('loading-indicator').style.display = 'none';
                 },
                 function (xhr) {
@@ -528,7 +529,6 @@
 
         function createChakraPoints() {
             chakraData.forEach(chakra => {
-                // Outer glow sphere - reduced size
                 const glowGeometry = new THREE.SphereGeometry(0.35, 32, 32);
                 const glowMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
@@ -537,7 +537,6 @@
                 });
                 const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
 
-                // Inner core sphere - reduced size
                 const coreGeometry = new THREE.SphereGeometry(0.18, 32, 32);
                 const coreMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
@@ -546,31 +545,19 @@
                 });
                 const coreSphere = new THREE.Mesh(coreGeometry, coreMaterial);
 
-                // Group them
                 const chakraGroup = new THREE.Group();
                 chakraGroup.add(glowSphere);
                 chakraGroup.add(coreSphere);
-                chakraGroup.position.set(
-                    chakra.position.x,
-                    chakra.position.y,
-                    chakra.position.z
-                );
+                chakraGroup.position.set(chakra.position.x, chakra.position.y, chakra.position.z);
                 chakraGroup.userData = { chakraId: chakra.id };
 
                 humanGroup.add(chakraGroup);
-                chakraMeshes[chakra.id] = {
-                    group: chakraGroup,
-                    glow: glowSphere,
-                    core: coreSphere,
-                    originalScale: 1
-                };
+                chakraMeshes[chakra.id] = { group: chakraGroup, glow: glowSphere, core: coreSphere, originalScale: 1 };
             });
         }
 
         function animate() {
             requestAnimationFrame(animate);
-
-            // Subtle pulsing animation for chakra points
             const time = Date.now() * 0.002;
             Object.keys(chakraMeshes).forEach((id, index) => {
                 const mesh = chakraMeshes[id];
@@ -578,7 +565,6 @@
                 const baseScale = markedChakras[id] ? 1.4 : 1;
                 mesh.glow.scale.setScalar(pulse * baseScale);
             });
-
             renderer.render(scene, camera);
         }
 
@@ -590,21 +576,16 @@
 
         function onMouseMove(e) {
             if (!isDragging) return;
-
             const deltaX = e.clientX - prevMouseX;
             const deltaY = e.clientY - prevMouseY;
-
             humanGroup.rotation.y += deltaX * 0.01;
             humanGroup.rotation.x += deltaY * 0.005;
             humanGroup.rotation.x = Math.max(-0.5, Math.min(0.5, humanGroup.rotation.x));
-
             prevMouseX = e.clientX;
             prevMouseY = e.clientY;
         }
 
-        function onMouseUp() {
-            isDragging = false;
-        }
+        function onMouseUp() { isDragging = false; }
 
         function onMouseWheel(e) {
             e.preventDefault();
@@ -614,30 +595,21 @@
 
         function onCanvasClick(e) {
             if (Math.abs(e.clientX - prevMouseX) > 5 || Math.abs(e.clientY - prevMouseY) > 5) return;
-
             const rect = renderer.domElement.getBoundingClientRect();
             const mouse = new THREE.Vector2(
                 ((e.clientX - rect.left) / rect.width) * 2 - 1,
                 -((e.clientY - rect.top) / rect.height) * 2 + 1
             );
-
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
-
             const chakraObjects = [];
-            Object.values(chakraMeshes).forEach(m => {
-                chakraObjects.push(m.glow, m.core);
-            });
-
+            Object.values(chakraMeshes).forEach(m => { chakraObjects.push(m.glow, m.core); });
             const intersects = raycaster.intersectObjects(chakraObjects);
-
             if (intersects.length > 0) {
                 const clickedObject = intersects[0].object;
                 const chakraGroup = clickedObject.parent;
                 const chakraId = chakraGroup.userData.chakraId;
-                if (chakraId) {
-                    selectChakra(chakraId);
-                }
+                if (chakraId) selectChakra(chakraId);
             }
         }
 
@@ -645,31 +617,25 @@
             const container = document.getElementById('canvas-container');
             const width = container.clientWidth;
             const height = container.clientHeight;
-
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         }
 
-        // UI Functions
         function buildChakraList() {
             const list = document.getElementById('chakra-list');
             list.innerHTML = '';
-
             chakraData.forEach(chakra => {
                 const li = document.createElement('li');
                 li.className = 'chakra-item';
                 li.dataset.chakraId = chakra.id;
-
                 const colorHex = '#' + chakra.color.toString(16).padStart(6, '0');
-
                 li.innerHTML = `
                     <div class="chakra-indicator" style="background-color: ${colorHex}"></div>
                     <span class="chakra-name">${chakra.name}</span>
                     <span class="chakra-sanskrit">${chakra.sanskrit}</span>
                     <div class="chakra-status" id="status-${chakra.id}"></div>
                 `;
-
                 li.addEventListener('click', () => selectChakra(chakra.id));
                 list.appendChild(li);
             });
@@ -677,24 +643,14 @@
 
         function selectChakra(chakraId) {
             selectedChakra = chakraData.find(c => c.id === chakraId);
-
-            // Update list selection
             document.querySelectorAll('.chakra-item').forEach(item => {
                 item.classList.toggle('selected', item.dataset.chakraId === chakraId);
             });
-
-            // Update info panel
             const infoPanel = document.getElementById('selected-info');
             infoPanel.classList.add('visible');
-
-            document.getElementById('selected-name').textContent = 
-                `${selectedChakra.name} — ${selectedChakra.sanskrit}`;
-            document.getElementById('selected-description').textContent = 
-                selectedChakra.description;
-            document.getElementById('selected-acupoint').textContent = 
-                selectedChakra.acupoint;
-
-            // Load existing data if marked
+            document.getElementById('selected-name').textContent = `${selectedChakra.name} — ${selectedChakra.sanskrit}`;
+            document.getElementById('selected-description').textContent = selectedChakra.description;
+            document.getElementById('selected-acupoint').textContent = selectedChakra.acupoint;
             if (markedChakras[chakraId]) {
                 document.getElementById('intensity-slider').value = markedChakras[chakraId].intensity;
                 document.getElementById('notes-input').value = markedChakras[chakraId].notes;
@@ -704,8 +660,6 @@
                 document.getElementById('notes-input').value = '';
                 document.getElementById('mark-btn').textContent = 'Mark as Area of Concern';
             }
-
-            // Highlight in 3D view
             Object.keys(chakraMeshes).forEach(id => {
                 const mesh = chakraMeshes[id];
                 if (id === chakraId) {
@@ -720,10 +674,8 @@
 
         function markChakra() {
             if (!selectedChakra) return;
-
             const intensity = document.getElementById('intensity-slider').value;
             const notes = document.getElementById('notes-input').value;
-
             markedChakras[selectedChakra.id] = {
                 name: selectedChakra.name,
                 sanskrit: selectedChakra.sanskrit,
@@ -731,17 +683,11 @@
                 notes: notes,
                 timestamp: new Date().toISOString()
             };
-
-            // Update status indicator
             document.getElementById(`status-${selectedChakra.id}`).classList.add('marked');
-
-            // Update 3D visualization
             const mesh = chakraMeshes[selectedChakra.id];
             mesh.glow.material.opacity = 0.6;
             mesh.core.scale.setScalar(1.3);
-
             document.getElementById('mark-btn').textContent = 'Update Concern';
-
             updateSummary();
         }
 
@@ -749,17 +695,13 @@
             const summaryText = document.getElementById('summary-text');
             const clearBtn = document.getElementById('clear-btn');
             const submitBtn = document.getElementById('submit-btn');
-
             const markedCount = Object.keys(markedChakras).length;
-
             if (markedCount === 0) {
                 summaryText.textContent = 'No areas marked yet. Select chakra points on the figure or from the list to indicate areas where you feel energetic imbalance.';
                 clearBtn.style.display = 'none';
                 submitBtn.style.display = 'none';
             } else {
-                const areas = Object.values(markedChakras)
-                    .map(c => `${c.name} (intensity: ${c.intensity}/10)`)
-                    .join(', ');
+                const areas = Object.values(markedChakras).map(c => `${c.name} (intensity: ${c.intensity}/10)`).join(', ');
                 summaryText.textContent = `Areas of concern: ${areas}`;
                 clearBtn.style.display = 'inline-block';
                 submitBtn.style.display = 'inline-block';
@@ -768,41 +710,26 @@
 
         function clearAll() {
             markedChakras = {};
-            
-            document.querySelectorAll('.chakra-status').forEach(el => {
-                el.classList.remove('marked');
-            });
-
+            document.querySelectorAll('.chakra-status').forEach(el => el.classList.remove('marked'));
             Object.values(chakraMeshes).forEach(mesh => {
                 mesh.glow.material.opacity = 0.35;
                 mesh.core.scale.setScalar(1);
             });
-
             document.getElementById('selected-info').classList.remove('visible');
             selectedChakra = null;
-
-            document.querySelectorAll('.chakra-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-
+            document.querySelectorAll('.chakra-item').forEach(item => item.classList.remove('selected'));
             updateSummary();
         }
 
         function submitIntake() {
-            const intakeData = {
-                timestamp: new Date().toISOString(),
-                concerns: markedChakras
-            };
-
+            const intakeData = { timestamp: new Date().toISOString(), concerns: markedChakras };
             console.log('Intake data to submit:', intakeData);
             alert('Intake submitted successfully. Your practitioner will review your concerns before your session.');
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initScene();
             buildChakraList();
-
             document.getElementById('mark-btn').addEventListener('click', markChakra);
             document.getElementById('clear-btn').addEventListener('click', clearAll);
             document.getElementById('submit-btn').addEventListener('click', submitIntake);
