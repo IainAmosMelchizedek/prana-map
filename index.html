@@ -336,31 +336,31 @@
     </footer>
 
     <script>
-        // Chakra data with colors, positions (adjusted for MakeHuman model scale in decimeters)
+        // Chakra data with traditional colors
         const chakraData = [
             {
                 id: 'crown',
                 name: 'Crown',
                 sanskrit: 'Sahasrara',
-                color: 0x9b59b6,
+                color: 0x9c27b0,
                 position: { x: 0, y: 18.5, z: 0 },
-                description: 'Connection to universal consciousness, spiritual awareness, and higher states of being.',
+                description: 'Spiritual connection, higher consciousness, enlightenment, and unity with the divine.',
                 acupoint: 'Correlates to GV20 (Bai Hui) — Point of energy union measured at top of head'
             },
             {
                 id: 'third-eye',
                 name: 'Third Eye',
                 sanskrit: 'Ajna',
-                color: 0x3498db,
+                color: 0x3f51b5,
                 position: { x: 0, y: 17.2, z: 1.2 },
-                description: 'Intuition, insight, mental clarity, and inner wisdom.',
+                description: 'Intuition, inner wisdom, insight, and perception beyond ordinary sight.',
                 acupoint: 'Located between the eyebrows, associated with pineal gland function'
             },
             {
                 id: 'throat',
                 name: 'Throat',
                 sanskrit: 'Vishuddha',
-                color: 0x00bcd4,
+                color: 0x2196f3,
                 position: { x: 0, y: 15.5, z: 0.8 },
                 description: 'Communication, self-expression, truth, and authenticity.',
                 acupoint: 'Thyroid region, connected to expression and metabolism'
@@ -378,7 +378,7 @@
                 id: 'solar-plexus',
                 name: 'Solar Plexus',
                 sanskrit: 'Manipura',
-                color: 0xf1c40f,
+                color: 0xffeb3b,
                 position: { x: 0, y: 12.0, z: 1.2 },
                 description: 'Personal power, confidence, willpower, and self-esteem.',
                 acupoint: 'Correlates to CT12 — Solar plexus measurement point'
@@ -387,18 +387,18 @@
                 id: 'sacral',
                 name: 'Sacral',
                 sanskrit: 'Svadhisthana',
-                color: 0xe67e22,
+                color: 0xff9800,
                 position: { x: 0, y: 10.2, z: 1.0 },
-                description: 'Creativity, emotions, sensuality, and adaptability.',
+                description: 'Creativity, emotions, sensuality, pleasure, and adaptability.',
                 acupoint: 'Lower abdominal region, connected to reproductive and digestive systems'
             },
             {
                 id: 'root',
                 name: 'Root',
                 sanskrit: 'Muladhara',
-                color: 0xe74c3c,
+                color: 0xf44336,
                 position: { x: 0, y: 8.5, z: 0.5 },
-                description: 'Grounding, security, survival instincts, and physical vitality.',
+                description: 'Grounding, survival, security, and physical vitality.',
                 acupoint: 'Base of spine, correlates to BL24 — Bladder meridian points (lumbar region)'
             }
         ];
@@ -504,21 +504,21 @@
 
         function createChakraPoints() {
             chakraData.forEach(chakra => {
-                // Outer glow sphere
-                const glowGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+                // Outer glow sphere - reduced size
+                const glowGeometry = new THREE.SphereGeometry(0.35, 32, 32);
                 const glowMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
-                    opacity: 0.3
+                    opacity: 0.35
                 });
                 const glowSphere = new THREE.Mesh(glowGeometry, glowMaterial);
 
-                // Inner core sphere
-                const coreGeometry = new THREE.SphereGeometry(0.25, 32, 32);
+                // Inner core sphere - reduced size
+                const coreGeometry = new THREE.SphereGeometry(0.18, 32, 32);
                 const coreMaterial = new THREE.MeshBasicMaterial({
                     color: chakra.color,
                     transparent: true,
-                    opacity: 0.9
+                    opacity: 0.95
                 });
                 const coreSphere = new THREE.Mesh(coreGeometry, coreMaterial);
 
@@ -688,8 +688,8 @@
                     mesh.core.material.opacity = 1;
                     mesh.glow.material.opacity = 0.5;
                 } else {
-                    mesh.core.material.opacity = 0.9;
-                    mesh.glow.material.opacity = 0.3;
+                    mesh.core.material.opacity = 0.95;
+                    mesh.glow.material.opacity = 0.35;
                 }
             });
         }
@@ -750,7 +750,7 @@
             });
 
             Object.values(chakraMeshes).forEach(mesh => {
-                mesh.glow.material.opacity = 0.3;
+                mesh.glow.material.opacity = 0.35;
                 mesh.core.scale.setScalar(1);
             });
 
