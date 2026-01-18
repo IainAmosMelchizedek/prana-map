@@ -295,6 +295,30 @@
     <main>
         <div class="viewer-container">
             <div id="canvas-container"></div>
+            <div class="lotus-backdrop">
+                <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Center petal -->
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.12"/>
+                    <!-- Inner petals -->
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.10" transform="rotate(-15, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.10" transform="rotate(15, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.08" transform="rotate(-30, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="25" ry="70" fill="#d4af37" opacity="0.08" transform="rotate(30, 200, 150)"/>
+                    <!-- Middle petals -->
+                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.07" transform="rotate(-45, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.07" transform="rotate(45, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.06" transform="rotate(-60, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="30" ry="85" fill="#d4af37" opacity="0.06" transform="rotate(60, 200, 150)"/>
+                    <!-- Outer petals -->
+                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.05" transform="rotate(-75, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.05" transform="rotate(75, 200, 150)"/>
+                    <ellipse cx="200" cy="150" rx="35" ry="100" fill="#d4af37" opacity="0.04" transform="rotate(-90, 200, 150)"/>
+                    <!-- Base petals (horizontal) -->
+                    <ellipse cx="200" cy="180" rx="50" ry="20" fill="#d4af37" opacity="0.08"/>
+                    <ellipse cx="160" cy="175" rx="40" ry="15" fill="#d4af37" opacity="0.06" transform="rotate(-10, 160, 175)"/>
+                    <ellipse cx="240" cy="175" rx="40" ry="15" fill="#d4af37" opacity="0.06" transform="rotate(10, 240, 175)"/>
+                </svg>
+            </div>
             <div class="loading-indicator" id="loading-indicator">Loading model...</div>
             <div class="viewer-instructions">
                 Click and drag to rotate. Scroll to zoom. Click a chakra point to select.
